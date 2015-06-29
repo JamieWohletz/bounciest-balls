@@ -2,16 +2,26 @@ import Ember from 'ember';
 /* global Physics */
 
 export default Ember.Component.extend({
-    width: 500,
-    height: 500,
-    ballDefaults: {
-        x: 50,
-        y: 50,
-        vx: 0,
-        vy: 0,
-        radius: 20,
-        restitution: 1.0,
-        cof: 0
+    tagName: 'section',
+    width: function(){
+        return this.$(window).width();
+    }.property(),
+    height: function(){
+        return this.$(window).height();
+    }.property(),
+    _generateBall: function() {
+        return Physics.body('circle', {
+            x: 50,
+            y: 50,
+            vx: 0,
+            vy: 0,
+            radius: 30,
+            restitution: 1.0,
+            cof: 0,
+            styles: {
+                fillStyle: this._getRandomColor()
+            }
+        });
     },
     draw: function(){
         var renderer, world, viewWidth, viewHeight;
@@ -128,8 +138,8 @@ export default Ember.Component.extend({
         growBodies: function(world) {
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
-                console.log(body.geometry);
                 body.radius += 1;
+                body.view = undefined;
             })
         },
         shrinkBodies: function(world){
@@ -139,8 +149,7 @@ export default Ember.Component.extend({
             })
         },
         addOneBody: function(world){
-            var ball = Physics.body('circle',this.get('ballDefaults'));
-            world.add(ball);
+            world.add(this._generateBall());
         },
         removeOneBody: function(world) {
             var bodies = world.getBodies();

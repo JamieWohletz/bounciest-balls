@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%;">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,8 +13,14 @@
     <link rel="stylesheet" href="assets/bounciest-balls.css">
 
     {{content-for 'head-footer'}}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
   </head>
-  <body>
+  <body style="height:100%;">
     {{content-for 'body'}}
 
     <script src="assets/vendor.js"></script>

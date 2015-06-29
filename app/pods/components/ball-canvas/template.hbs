@@ -1,7 +1,9 @@
-<canvas id="physics-canvas" width="500" height="500"></canvas>
-<button {{action "slowBodiesDown" world}}>Slow Down</button>
-<button {{action "speedBodiesUp" world}}>Speed Up</button>
-<button {{action "growBodies" world}}>Bigger</button>
-<button {{action "shrinkBodies" world}}>Smaller</button>
-<button {{action "addOneBody" world}}>Add Ball</button>
-<button {{action "removeOneBody" world}}>Remove Ball</button>
+<canvas id="physics-canvas"></canvas>
+<div id="controls">
+    <button {{action "slowBodiesDown" world}}>Slow Down</button>
+    <button {{action "speedBodiesUp" world}}>Speed Up</button>
+    <button {{action "growBodies" world}}>Bigger</button>
+    <button {{action "shrinkBodies" world}}>Smaller</button>
+    <button {{action "addOneBody" world}}>Add Ball</button>
+    <button {{action "removeOneBody" world}}>Remove Ball</button>
+</div>
