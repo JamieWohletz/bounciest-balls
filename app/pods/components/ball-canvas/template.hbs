@@ -1,6 +1,15 @@
 <canvas id="physics-canvas"></canvas>
 <div id="controls">
-    <span class="pause">
+
+    <span class="quantity">
+        <button {{action "addOneBody" world}} id="add-one">
+            {{fa-icon "plus"}}
+        </button>
+        <button {{action "removeOneBody" world}}>{{fa-icon "minus"}}</button>
+    </span>
+
+    <span class="speed">
+        <button {{action "slowBodiesDown" world}}>{{fa-icon "backward"}}</button>
         <button {{action "pause" world}}>
             {{#if paused}}
                 {{fa-icon "play"}}
@@ -8,21 +17,12 @@
                 {{fa-icon "pause"}}
             {{/if}}
         </button>
-    </span>
-
-    <span class="quantity">
-        <button {{action "addOneBody" world}}>{{fa-icon "plus"}}</button>
-        <button {{action "removeOneBody" world}}>{{fa-icon "minus"}}</button>
-    </span>
-
-    <span class="speed">
-        <button {{action "slowBodiesDown" world}}>{{fa-icon "backward"}}</button>
         <button {{action "speedBodiesUp" world}}>{{fa-icon "forward"}}</button>
     </span>
 
     <span class="size">
-        <button {{action "growBodies" world}}>Bigger</button>
-        <button {{action "shrinkBodies" world}}>Smaller</button>
+        <button {{action "growBodies" world}}>{{fa-icon "expand"}}</button>
+        <button {{action "shrinkBodies" world}}>{{fa-icon "compress"}}</button>
     </span>
 
     <span class="collisions">

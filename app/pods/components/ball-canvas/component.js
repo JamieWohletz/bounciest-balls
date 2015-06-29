@@ -3,6 +3,7 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     VELOCITY_INCREMENT: .07,
+    SIZE_INCREMENT: 3,
 
     tagName: 'section',
     width: function(){
@@ -40,7 +41,8 @@ export default Ember.Component.extend({
         });
     },
     draw: function(){
-        var renderer, world, viewWidth, viewHeight;
+        var renderer, world, viewWidth, viewHeight, element;
+        element = 'physics-canvas';
 
         viewWidth = this.get('width');
         viewHeight = this.get('height');
@@ -51,7 +53,7 @@ export default Ember.Component.extend({
         });
 
         renderer = new Physics.renderer('canvas', {
-            el: 'physics-canvas',
+            el: element,
             width: viewWidth,
             height: viewHeight,
             meta: false,
@@ -80,31 +82,44 @@ export default Ember.Component.extend({
 
         //make balls bounce off the walls
         world.add(Physics.behavior('body-impulse-response'));
+        //make bodies interactive
+        world.add(Physics.behavior('interactive',{
+            el: renderer.el
+        }));
 
         Physics.util.ticker.on(function(time){
             world.step(time);
         });
 
         Physics.util.ticker.start();
+
+        this._setupInteractions(world);
         this.set('world',world);
     }.on('didInsertElement'),
 
     _setupInteractions: function(world){
-        // world.on('interact:grab', function(data) {
-        //
-        // })
+        world.on('interact:poke', function(data) {
+            console.log('poked! ', data);
+        })
     },
 
     _getRandomColor: function () {
+        // var colorSet = [
+        //     'rgba(255,0,0,0.7)',
+        //     'rgba(255,127,0,0.7)',
+        //     'rgba(255,255,0,0.7)',
+        //     'rgba(0,255,0,0.7)',
+        //     'rgba(0,0,255,0.7)',
+        //     'rgba(75,0,130,0.7)',
+        //     'rgba(143,0,255,0.7)'
+        // ];
         var colorSet = [
-            'red',
-            'orange',
-            'yellow',
-            'green',
-            'blue',
-            'indigo',
-            'violet'
-        ];
+            '#FF170C',
+            '#DE0A53',
+            '#B60ADE',
+            '#8C0CF9',
+            '#F501CF'
+        ]
         return colorSet[Math.floor(Math.random() * colorSet.length)];
     },
 
@@ -133,6 +148,18 @@ export default Ember.Component.extend({
             body.restitution = body.restitution == 1? 0.7 : 1;
         })
         this.set('elasticityOn',!this.get('elasticityOn'));
+    },
+
+    changeSizeOfBodies: function(world, larger) {
+        var bodies = world.getBodies(),
+            INC = this.get('SIZE_INCREMENT');
+        bodies.forEach(function(body,index){
+            var change = larger? INC : -INC;
+            if(change > 0 || (change < 0 && body.geometry.radius - INC > 0)) {
+                body.geometry.radius += change;
+            }
+            body.view = undefined;
+        })
     },
 
     actions: {
@@ -183,17 +210,10 @@ export default Ember.Component.extend({
             })
         },
         growBodies: function(world) {
-            var bodies = world.getBodies();
-            bodies.forEach(function(body,index){
-                body.radius += 1;
-                body.view = undefined;
-            })
+            this.changeSizeOfBodies(world, true);
         },
         shrinkBodies: function(world){
-            var bodies = world.getBodies();
-            bodies.forEach(function(body,index){
-                body.radius -= 1;
-            })
+            this.changeSizeOfBodies(world, false);
         },
         addOneBody: function(world){
             world.add(this._generateBall());
