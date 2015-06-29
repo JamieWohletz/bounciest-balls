@@ -2,6 +2,8 @@ import Ember from 'ember';
 /* global Physics */
 
 export default Ember.Component.extend({
+    VELOCITY_INCREMENT: .07,
+
     tagName: 'section',
     width: function(){
         return this.$(window).width();
@@ -9,14 +11,28 @@ export default Ember.Component.extend({
     height: function(){
         return this.$(window).height();
     }.property(),
+
+    paused: false,
+
+    collisionsOn: false,
+    collisionBehaviors: [
+        Physics.behavior('body-collision-detection'),
+        Physics.behavior('sweep-prune')
+    ],
+
+    gravityOn: false,
+    gravityBehavior: Physics.behavior('constant-acceleration'),
+
+    elasticityOn: true,
+
     _generateBall: function() {
         return Physics.body('circle', {
             x: 50,
             y: 50,
-            vx: 0,
-            vy: 0,
-            radius: 30,
-            restitution: 1.0,
+            vx: Math.random(),
+            vy: Math.random(),
+            radius: Math.random() * (50 - 10) + 10,
+            restitution: 1,
             cof: 0,
             styles: {
                 fillStyle: this._getRandomColor()
@@ -62,10 +78,8 @@ export default Ember.Component.extend({
             restitution: 1
         }));
 
+        //make balls bounce off the walls
         world.add(Physics.behavior('body-impulse-response'));
-        world.add( Physics.behavior('body-collision-detection') );
-        world.add( Physics.behavior('sweep-prune') );
-        world.add(Physics.behavior('constant-acceleration'));
 
         Physics.util.ticker.on(function(time){
             world.step(time);
@@ -82,36 +96,69 @@ export default Ember.Component.extend({
     },
 
     _getRandomColor: function () {
-        var letters = '0123456789ABCDEF'.split('');
-        var color = '#';
-        for (var i = 0; i < 6; i++ ) {
-            color += letters[Math.floor(Math.random() * 16)];
+        var colorSet = [
+            'red',
+            'orange',
+            'yellow',
+            'green',
+            'blue',
+            'indigo',
+            'violet'
+        ];
+        return colorSet[Math.floor(Math.random() * colorSet.length)];
+    },
+
+    toggleBallCollisions: function(world){
+        var collisionsOn = this.get('collisionsOn');
+        var behaviors = this.get('collisionBehaviors');
+        if (collisionsOn) {
+            world.removeBehavior(behaviors[0]);
+            world.removeBehavior(behaviors[1]);
         }
-        return color;
+        else {
+            world.addBehavior(behaviors[0]);
+            world.addBehavior(behaviors[1]);
+        }
+        this.set('collisionsOn', !this.get('collisionsOn'));
+    },
+
+    toggleGravityEffect: function(world) {
+        var grav = this.get('gravityBehavior');
+        this.get('gravityOn')? world.removeBehavior(grav) : world.addBehavior(grav);
+        this.set('gravityOn',!this.get('gravityOn'));
+    },
+
+    toggleElasticBalls: function(world) {
+        world.getBodies().forEach(function(body){
+            body.restitution = body.restitution == 1? 0.7 : 1;
+        })
+        this.set('elasticityOn',!this.get('elasticityOn'));
     },
 
     actions: {
         speedBodiesUp: function(world){
+            var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
                 var x = body.state.vel.x,
                     y = body.state.vel.y;
                 if(x < 0) {
-                    x -= .05;
+                    x -= INC;
                 }
                 else {
-                    x += .05;
+                    x += INC;
                 }
                 if(y < 0) {
-                    y -= .05;
+                    y -= INC;
                 }
                 else {
-                    y += .05;
+                    y += INC;
                 }
                 body.state.vel.set(x,y);
             })
         },
         slowBodiesDown: function(world){
+            var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
                 var x = body.state.vel.x,
@@ -121,16 +168,16 @@ export default Ember.Component.extend({
                 }
 
                 if(x < 0) {
-                    x += .05;
+                    x += INC;
                 }
                 else {
-                    x -= .05;
+                    x -= INC;
                 }
                 if(y < 0) {
-                    y += .05;
+                    y += INC;
                 }
                 else {
-                    y -= .05;
+                    y -= INC;
                 }
                 body.state.vel.set(x,y);
             })
@@ -154,8 +201,27 @@ export default Ember.Component.extend({
         removeOneBody: function(world) {
             var bodies = world.getBodies();
             if(bodies.length > 0){
-                world.removeBody(world.getBodies()[0]);
+                world.removeBody(bodies[0]);
             }
+        },
+        toggleCollisionDetection: function(world) {
+            this.toggleBallCollisions(world);
+        },
+        pause: function(world) {
+            if(world.isPaused()) {
+                world.unpause();
+                this.set('paused',false);
+            }
+            else {
+                world.pause();
+                this.set('paused',true);
+            }
+        },
+        toggleGravity: function(world) {
+            this.toggleGravityEffect(world);
+        },
+        toggleElasticity: function(world) {
+            this.toggleElasticBalls(world);
         }
     }
 

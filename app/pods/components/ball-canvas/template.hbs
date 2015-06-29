@@ -1,9 +1,60 @@
 <canvas id="physics-canvas"></canvas>
 <div id="controls">
-    <button {{action "slowBodiesDown" world}}>Slow Down</button>
-    <button {{action "speedBodiesUp" world}}>Speed Up</button>
-    <button {{action "growBodies" world}}>Bigger</button>
-    <button {{action "shrinkBodies" world}}>Smaller</button>
-    <button {{action "addOneBody" world}}>Add Ball</button>
-    <button {{action "removeOneBody" world}}>Remove Ball</button>
+    <span class="pause">
+        <button {{action "pause" world}}>
+            {{#if paused}}
+                {{fa-icon "play"}}
+            {{else}}
+                {{fa-icon "pause"}}
+            {{/if}}
+        </button>
+    </span>
+
+    <span class="quantity">
+        <button {{action "addOneBody" world}}>{{fa-icon "plus"}}</button>
+        <button {{action "removeOneBody" world}}>{{fa-icon "minus"}}</button>
+    </span>
+
+    <span class="speed">
+        <button {{action "slowBodiesDown" world}}>{{fa-icon "backward"}}</button>
+        <button {{action "speedBodiesUp" world}}>{{fa-icon "forward"}}</button>
+    </span>
+
+    <span class="size">
+        <button {{action "growBodies" world}}>Bigger</button>
+        <button {{action "shrinkBodies" world}}>Smaller</button>
+    </span>
+
+    <span class="collisions">
+        <button {{action "toggleCollisionDetection" world}}>
+            {{#if collisionsOn}}
+                {{fa-icon "check"}}
+            {{else}}
+                {{fa-icon "close"}}
+            {{/if}}
+            Collisions
+        </button>
+    </span>
+
+    <span class="gravity">
+        <button {{action "toggleGravity" world}}>
+            {{#if gravityOn}}
+                {{fa-icon "check"}}
+            {{else}}
+                {{fa-icon "close"}}
+            {{/if}}
+            Gravity
+        </button>
+    </span>
+
+    <span class="elasticity">
+        <button {{action "toggleElasticity" world}}>
+            {{#if elasticityOn}}
+                {{fa-icon "check"}}
+            {{else}}
+                {{fa-icon "close"}}
+            {{/if}}
+            Elasticity
+        </button>
+    </span>
 </div>
