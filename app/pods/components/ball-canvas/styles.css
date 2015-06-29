@@ -1,0 +1,9 @@
+& {
+    width: 500px;
+    height: 500px;
+    border: solid 1px black;
+}
+#physics-canvas {
+    position:static !important;
+    background:black;
+}

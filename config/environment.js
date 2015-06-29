@@ -4,6 +4,7 @@ module.exports = function(environment) {
   var ENV = {
     modulePrefix: 'bounciest-balls',
     environment: environment,
+    podModulePrefix: 'bounciest-balls/pods',
     baseURL: '/',
     locationType: 'auto',
     EmberENV: {
