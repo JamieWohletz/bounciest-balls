@@ -3,7 +3,7 @@ import Ember from 'ember';
 /* global screenfull */
 
 export default Ember.Component.extend({
-    VELOCITY_INCREMENT: .07,
+    VELOCITY_INCREMENT: 0.07,
     SIZE_INCREMENT: 3,
 
     tagName: 'section',
@@ -90,7 +90,7 @@ export default Ember.Component.extend({
         var renderer, world, viewWidth, viewHeight, element, self;
         self = this;
 
-        Physics.body.mixin('collide', function( other ){
+        Physics.body.mixin('collide', function(){
             //wall
             if(this.radius) {
                 this.styles.fillStyle = self._sampleColor();
@@ -156,9 +156,7 @@ export default Ember.Component.extend({
 
     _setupListeners: function(world){
         var self = this;
-        world.on('interact:poke', function(data) {
 
-        });
         world.on('collisions:detected', function(data) {
             if(!self.get('changeColors')) {
                 return;
@@ -230,27 +228,27 @@ export default Ember.Component.extend({
 
     toggleElasticBalls: function(world) {
         world.getBodies().forEach(function(body){
-            body.restitution = body.restitution == 1? 0.7 : 1;
-        })
+            body.restitution = body.restitution === 1? 0.7 : 1;
+        });
         this.set('elasticityOn',!this.get('elasticityOn'));
     },
 
     changeSizeOfBodies: function(world, larger) {
         var bodies = world.getBodies(),
             INC = this.get('SIZE_INCREMENT');
-        bodies.forEach(function(body,index){
+        bodies.forEach(function(body){
             var change = larger? INC : -INC;
             if(change > 0 || (change < 0 && body.geometry.radius - INC > 0)) {
                 body.geometry.radius += change;
             }
             body.view = undefined;
-        })
+        });
     },
 
     makeBodiesFaster: function(world) {
         var INC = this.get('VELOCITY_INCREMENT');
         var bodies = world.getBodies();
-        bodies.forEach(function(body,index){
+        bodies.forEach(function(body){
             var oldX = body.state.vel.x,
                 oldY = body.state.vel.y,
                 x = oldX,
@@ -269,21 +267,21 @@ export default Ember.Component.extend({
             }
 
             body.state.vel.set(x,y);
-        })
+        });
     },
 
     makeBodiesSlower: function(world) {
         var numSign = function(num) {
             return num?num<0?-1:1:0;
-        }
+        };
 
-        var world = this.get('world');
         var INC = this.get('VELOCITY_INCREMENT');
         var bodies = world.getBodies();
-        bodies.forEach(function(body,index){
+        bodies.forEach(function(body){
             var x = body.state.vel.x,
                 y = body.state.vel.y;
-            if(x == 0 && y == 0) {
+
+            if(x === 0 && y === 0) {
                 return;
             }
 
@@ -301,13 +299,13 @@ export default Ember.Component.extend({
             }
 
             if(
-                numSign(x) !== numSign(body.state.vel.x)
-                || numSign(y) !== numSign(body.state.vel.y)
+                numSign(x) !== numSign(body.state.vel.x) ||
+                numSign(y) !== numSign(body.state.vel.y)
             ) {
                 return;
             }
             body.state.vel.set(x,y);
-        })
+        });
     },
 
     actions: {
@@ -315,7 +313,7 @@ export default Ember.Component.extend({
             this.makeBodiesFaster(this.get('world'));
         },
         slowBodiesDown: function(){
-            this.makeBodiesSlower(this.get('world')); 
+            this.makeBodiesSlower(this.get('world'));
         },
         growBodies: function() {
             this.changeSizeOfBodies(this.get('world'), true);
