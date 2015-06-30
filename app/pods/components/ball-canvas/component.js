@@ -3,6 +3,8 @@ import Ember from 'ember';
 /* global screenfull */
 
 export default Ember.Component.extend({
+    classNames: ['ball-canvas-component'],
+
     VELOCITY_INCREMENT: 0.07,
     SIZE_INCREMENT: 3,
 
