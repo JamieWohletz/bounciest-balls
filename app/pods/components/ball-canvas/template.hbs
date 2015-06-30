@@ -54,7 +54,7 @@
                 {{else}}
                     {{fa-icon "close"}}
                 {{/if}}
-                Collisions
+                collisions
             </button>
         </span>
 
@@ -65,7 +65,7 @@
                 {{else}}
                     {{fa-icon "close"}}
                 {{/if}}
-                Gravity
+                gravity
             </button>
         </span>
 
@@ -76,7 +76,7 @@
                 {{else}}
                     {{fa-icon "close"}}
                 {{/if}}
-                Elasticity
+                elasticity
             </button>
         </span>
 
@@ -89,25 +89,37 @@
                 {{/if}}
             </button>
         </span>
+
+        <button {{action "toggleChangeColors"}}>
+            {{#if changeColors}}
+                {{fa-icon "check"}}
+            {{else}}
+                {{fa-icon "close"}}
+            {{/if}}
+            change colors
+        </button>
     </div>
     <div>
         {{fa-icon "tint"}}
         <!-- This is ugly -- hoping to do this a better way soon -->
         <span class="colors">
             <button {{action "setColorScheme" "sunset"}}>
-                Sunset
+                sunset
             </button>
             <button {{action "setColorScheme" "rainbow"}}>
-                Rainbow
+                rainbow
             </button>
             <button {{action "setColorScheme" "icy"}}>
-                Icy
+                icy
             </button>
             <button {{action "setColorScheme" "magenta"}}>
-                Magenta
+                magenta
             </button>
             <button {{action "setColorScheme" "america"}}>
-                America
+                america
+            </button>
+            <button {{action "setColorScheme" "random"}}>
+                random
             </button>
         </span>
     </div>

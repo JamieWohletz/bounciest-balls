@@ -16,7 +16,8 @@ export default Ember.Component.extend({
 
     paused: false,
     fullscreen: false,
-    controlsHidden: true,
+    controlsHidden: false,
+    changeColors: false,
 
     collisionsOn: false,
     collisionBehaviors: [
@@ -67,7 +68,8 @@ export default Ember.Component.extend({
             '#C1233E',
             '#202E5B',
             '#5F85C0'
-        ]
+        ],
+        'random': []
     },
 
     _generateBall: function() {
@@ -84,8 +86,19 @@ export default Ember.Component.extend({
             }
         });
     },
-    draw: function(){
-        var renderer, world, viewWidth, viewHeight, element;
+    _init: function(){
+        var renderer, world, viewWidth, viewHeight, element, self;
+        self = this;
+
+        Physics.body.mixin('collide', function( other ){
+            //wall
+            if(this.radius) {
+                this.styles.fillStyle = self._sampleColor();
+                this.view = undefined;
+            }
+
+            return true;
+        });
         element = 'physics-canvas';
 
         viewWidth = this.get('width');
@@ -137,14 +150,30 @@ export default Ember.Component.extend({
 
         Physics.util.ticker.start();
 
-        this._setupInteractions(world);
+        this._setupListeners(world);
         this.set('world',world);
     }.on('didInsertElement'),
 
-    _setupInteractions: function(world){
+    _setupListeners: function(world){
+        var self = this;
         world.on('interact:poke', function(data) {
 
-        })
+        });
+        world.on('collisions:detected', function(data) {
+            if(!self.get('changeColors')) {
+                return;
+            }
+            var c;
+            for (var i = 0, l = data.collisions.length; i < l; i++){
+                c = data.collisions[ i ];
+                if ( c.bodyA.collide ){
+                    c.bodyA.collide( c.bodyB );
+                }
+                if ( c.bodyB.collide ){
+                    c.bodyB.collide( c.bodyA );
+                }
+            }
+        });
     },
 
     activateColorScheme: function(schemeName){
@@ -161,8 +190,22 @@ export default Ember.Component.extend({
     },
 
     _sampleColor: function () {
+        var colorScheme = this.get('activeColorScheme');
+        if(colorScheme === 'random') {
+            return this._randomColor();
+        }
+
         var colorSet = this.get('colorSchemes')[this.get('activeColorScheme')];
         return colorSet[Math.floor(Math.random() * colorSet.length)];
+    },
+
+    _randomColor: function() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     },
 
     toggleBallCollisions: function(world){
@@ -204,68 +247,75 @@ export default Ember.Component.extend({
         })
     },
 
-    actions: {
-        speedBodiesUp: function(){
-            var world = this.get('world');
-            var INC = this.get('VELOCITY_INCREMENT');
-            var bodies = world.getBodies();
-            bodies.forEach(function(body,index){
-                var oldX = body.state.vel.x,
-                    oldY = body.state.vel.y,
-                    x = oldX,
-                    y = oldY;
-                if(x < 0) {
-                    x -= INC;
-                }
-                else {
-                    x += INC;
-                }
-                if(y < 0) {
-                    y -= INC;
-                }
-                else {
-                    y += INC;
-                }
-
-                body.state.vel.set(x,y);
-            })
-        },
-        slowBodiesDown: function(){
-            var numSign = function(num) {
-                return num?num<0?-1:1:0;
+    makeBodiesFaster: function(world) {
+        var INC = this.get('VELOCITY_INCREMENT');
+        var bodies = world.getBodies();
+        bodies.forEach(function(body,index){
+            var oldX = body.state.vel.x,
+                oldY = body.state.vel.y,
+                x = oldX,
+                y = oldY;
+            if(x < 0) {
+                x -= INC;
+            }
+            else {
+                x += INC;
+            }
+            if(y < 0) {
+                y -= INC;
+            }
+            else {
+                y += INC;
             }
 
-            var world = this.get('world');
-            var INC = this.get('VELOCITY_INCREMENT');
-            var bodies = world.getBodies();
-            bodies.forEach(function(body,index){
-                var x = body.state.vel.x,
-                    y = body.state.vel.y;
-                if(x == 0 && y == 0) {
-                    return;
-                }
+            body.state.vel.set(x,y);
+        })
+    },
 
-                if(x < 0) {
-                    x += INC;
-                }
-                else {
-                    x -= INC;
-                }
-                if(y < 0) {
-                    y += INC;
-                }
-                else {
-                    y -= INC;
-                }
+    makeBodiesSlower: function(world) {
+        var numSign = function(num) {
+            return num?num<0?-1:1:0;
+        }
 
-                if(
-                    numSign(x) !== numSign(body.state.vel.x)
-                    || numSign(y) !== numSign(body.state.vel.y)
-                ) {
-                    return;
-                }
-                body.state.vel.set(x,y);
-            })
+        var world = this.get('world');
+        var INC = this.get('VELOCITY_INCREMENT');
+        var bodies = world.getBodies();
+        bodies.forEach(function(body,index){
+            var x = body.state.vel.x,
+                y = body.state.vel.y;
+            if(x == 0 && y == 0) {
+                return;
+            }
+
+            if(x < 0) {
+                x += INC;
+            }
+            else {
+                x -= INC;
+            }
+            if(y < 0) {
+                y += INC;
+            }
+            else {
+                y -= INC;
+            }
+
+            if(
+                numSign(x) !== numSign(body.state.vel.x)
+                || numSign(y) !== numSign(body.state.vel.y)
+            ) {
+                return;
+            }
+            body.state.vel.set(x,y);
+        })
+    },
+
+    actions: {
+        speedBodiesUp: function(){
+            this.makeBodiesFaster(this.get('world'));
+        },
+        slowBodiesDown: function(){
+            this.makeBodiesSlower(this.get('world')); 
         },
         growBodies: function() {
             this.changeSizeOfBodies(this.get('world'), true);
@@ -308,6 +358,9 @@ export default Ember.Component.extend({
                 screenfull.toggle();
                 this.set('fullscreen',!this.get('fullscreen'));
             }
+        },
+        toggleChangeColors: function() {
+            this.set('changeColors',!this.get('changeColors'));
         },
         setColorScheme: function(schemeName) {
             this.activateColorScheme(schemeName);

@@ -12,17 +12,16 @@
     height:100%;
 }
 #show-hide-controls {
-    padding:5px;
-    border: solid 1px white;
+    padding:10px;
+    border:none;
     z-index:5;
     background: none;
     color:white;
     position:absolute;
-    top:0;
-    left:0;
+    top:5px;
+    left:5px;
 }
 #controls  {
-    display:none;
     background:rgba(240,240,240,0.4);
     margin:1rem;
     padding:5px;
@@ -39,6 +38,10 @@
     background:rgba(255,255,255,0.5);
     border:none;
     color:black;
-    font-family: monospace;
+    font-family: sans-serif;
     border-radius:2px;
+}
+#controls button:active {
+    background:rgba(255,255,255,1);
+    border:solid 1px black;
 }
