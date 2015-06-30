@@ -1,5 +1,6 @@
 import Ember from 'ember';
 /* global Physics */
+/* global screenfull */
 
 export default Ember.Component.extend({
     VELOCITY_INCREMENT: .07,
@@ -14,6 +15,7 @@ export default Ember.Component.extend({
     }.property(),
 
     paused: false,
+    fullscreen: false,
 
     collisionsOn: false,
     collisionBehaviors: [
@@ -99,7 +101,7 @@ export default Ember.Component.extend({
 
     _setupInteractions: function(world){
         world.on('interact:poke', function(data) {
-            console.log('poked! ', data);
+            
         })
     },
 
@@ -163,7 +165,8 @@ export default Ember.Component.extend({
     },
 
     actions: {
-        speedBodiesUp: function(world){
+        speedBodiesUp: function(){
+            var world = this.get('world');
             var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
@@ -184,7 +187,8 @@ export default Ember.Component.extend({
                 body.state.vel.set(x,y);
             })
         },
-        slowBodiesDown: function(world){
+        slowBodiesDown: function(){
+            var world = this.get('world');
             var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
@@ -209,25 +213,27 @@ export default Ember.Component.extend({
                 body.state.vel.set(x,y);
             })
         },
-        growBodies: function(world) {
-            this.changeSizeOfBodies(world, true);
+        growBodies: function() {
+            this.changeSizeOfBodies(this.get('world'), true);
         },
-        shrinkBodies: function(world){
-            this.changeSizeOfBodies(world, false);
+        shrinkBodies: function(){
+            this.changeSizeOfBodies(this.get('world'), false);
         },
-        addOneBody: function(world){
-            world.add(this._generateBall());
+        addOneBody: function(){
+            this.get('world').add(this._generateBall());
         },
-        removeOneBody: function(world) {
+        removeOneBody: function() {
+            var world = this.get('world');
             var bodies = world.getBodies();
             if(bodies.length > 0){
                 world.removeBody(bodies[0]);
             }
         },
-        toggleCollisionDetection: function(world) {
-            this.toggleBallCollisions(world);
+        toggleCollisionDetection: function() {
+            this.toggleBallCollisions(this.get('world'));
         },
-        pause: function(world) {
+        pause: function() {
+            var world = this.get('world');
             if(world.isPaused()) {
                 world.unpause();
                 this.set('paused',false);
@@ -237,11 +243,17 @@ export default Ember.Component.extend({
                 this.set('paused',true);
             }
         },
-        toggleGravity: function(world) {
-            this.toggleGravityEffect(world);
+        toggleGravity: function() {
+            this.toggleGravityEffect(this.get('world'));
         },
-        toggleElasticity: function(world) {
-            this.toggleElasticBalls(world);
+        toggleElasticity: function() {
+            this.toggleElasticBalls(this.get('world'));
+        },
+        toggleFullscreen: function() {
+            if(screenfull.enabled) {
+                screenfull.toggle();
+                this.set('fullscreen',!this.get('fullscreen'));
+            }
         }
     }
 

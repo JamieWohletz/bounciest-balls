@@ -2,31 +2,41 @@
 <div id="controls">
 
     <span class="quantity">
-        <button {{action "addOneBody" world}} id="add-one">
-            {{fa-icon "plus"}}
-        </button>
-        <button {{action "removeOneBody" world}}>{{fa-icon "minus"}}</button>
+        {{#mousedown-button action="addOneBody"}}
+            {{fa-icon "plus"}} 1 ball
+        {{/mousedown-button}}
+        {{#mousedown-button action="removeOneBody"}}
+            {{fa-icon "minus"}} 1 ball
+        {{/mousedown-button}}
     </span>
 
     <span class="speed">
-        <button {{action "slowBodiesDown" world}}>{{fa-icon "backward"}}</button>
-        <button {{action "pause" world}}>
+        {{#mousedown-button action="slowBodiesDown"}}
+            {{fa-icon "backward"}}
+        {{/mousedown-button}}
+        <button {{action "pause"}}>
             {{#if paused}}
                 {{fa-icon "play"}}
             {{else}}
                 {{fa-icon "pause"}}
             {{/if}}
         </button>
-        <button {{action "speedBodiesUp" world}}>{{fa-icon "forward"}}</button>
+        {{#mousedown-button action="speedBodiesUp"}}
+            {{fa-icon "forward"}}
+        {{/mousedown-button}}
     </span>
 
     <span class="size">
-        <button {{action "growBodies" world}}>{{fa-icon "expand"}}</button>
-        <button {{action "shrinkBodies" world}}>{{fa-icon "compress"}}</button>
+        {{#mousedown-button action="growBodies"}}
+            {{fa-icon "plus"}} size
+        {{/mousedown-button}}
+        {{#mousedown-button action="shrinkBodies"}}
+            {{fa-icon "minus"}} size
+        {{/mousedown-button}}
     </span>
 
     <span class="collisions">
-        <button {{action "toggleCollisionDetection" world}}>
+        <button {{action "toggleCollisionDetection"}}>
             {{#if collisionsOn}}
                 {{fa-icon "check"}}
             {{else}}
@@ -37,7 +47,7 @@
     </span>
 
     <span class="gravity">
-        <button {{action "toggleGravity" world}}>
+        <button {{action "toggleGravity"}}>
             {{#if gravityOn}}
                 {{fa-icon "check"}}
             {{else}}
@@ -48,7 +58,7 @@
     </span>
 
     <span class="elasticity">
-        <button {{action "toggleElasticity" world}}>
+        <button {{action "toggleElasticity"}}>
             {{#if elasticityOn}}
                 {{fa-icon "check"}}
             {{else}}
@@ -57,4 +67,15 @@
             Elasticity
         </button>
     </span>
+
+    <span class="fullscreen">
+        <button {{action "toggleFullscreen"}}>
+            {{#if fullscreen}}
+                {{fa-icon "compress"}}
+            {{else}}
+                {{fa-icon "expand"}}
+            {{/if}}
+        </button>
+    </span>
+
 </div>

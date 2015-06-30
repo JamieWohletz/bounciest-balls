@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="height:100%;">
+<html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,13 +14,15 @@
 
     {{content-for 'head-footer'}}
     <style>
-        body {
-            margin: 0;
-            padding: 0;
+        html,body {
+            height:100%;
+            margin:0;
+            padding:0;
+            overflow:hidden;
         }
     </style>
   </head>
-  <body style="height:100%;">
+  <body>
     {{content-for 'body'}}
 
     <script src="assets/vendor.js"></script>
