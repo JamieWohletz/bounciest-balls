@@ -16,6 +16,7 @@ export default Ember.Component.extend({
 
     paused: false,
     fullscreen: false,
+    controlsHidden: true,
 
     collisionsOn: false,
     collisionBehaviors: [
@@ -28,6 +29,47 @@ export default Ember.Component.extend({
 
     elasticityOn: true,
 
+    activeColorScheme: 'sunset',
+    colorSchemes: {
+        'sunset': [
+            '#FFE029',
+            '#E87115',
+            '#FF1614',
+            '#86A4E8',
+            '#1A28FF'
+        ],
+        'rainbow': [
+            '#FF0000',
+            '#FF7F00',
+            '#FFFF00',
+            '#00FF00',
+            '#0000FF',
+            '#4b0082',
+            '#8B00FF'
+        ],
+        'icy': [
+            '#022957',
+            '#042E5A',
+            '#4684C0',
+            '#C0DAF2',
+            '#7FC1F1'
+        ],
+        'magenta': [
+            '#FF170C',
+            '#DE0A53',
+            '#B60ADE',
+            '#8C0CF9',
+            '#F501CF'
+        ],
+        'america': [
+            '#D5D6DB',
+            '#3E0311',
+            '#C1233E',
+            '#202E5B',
+            '#5F85C0'
+        ]
+    },
+
     _generateBall: function() {
         return Physics.body('circle', {
             x: 50,
@@ -38,7 +80,7 @@ export default Ember.Component.extend({
             restitution: 1,
             cof: 0,
             styles: {
-                fillStyle: this._getRandomColor()
+                fillStyle: this._sampleColor()
             }
         });
     },
@@ -101,27 +143,25 @@ export default Ember.Component.extend({
 
     _setupInteractions: function(world){
         world.on('interact:poke', function(data) {
-            
+
         })
     },
 
-    _getRandomColor: function () {
-        // var colorSet = [
-        //     'rgba(255,0,0,0.7)',
-        //     'rgba(255,127,0,0.7)',
-        //     'rgba(255,255,0,0.7)',
-        //     'rgba(0,255,0,0.7)',
-        //     'rgba(0,0,255,0.7)',
-        //     'rgba(75,0,130,0.7)',
-        //     'rgba(143,0,255,0.7)'
-        // ];
-        var colorSet = [
-            '#FF170C',
-            '#DE0A53',
-            '#B60ADE',
-            '#8C0CF9',
-            '#F501CF'
-        ]
+    activateColorScheme: function(schemeName){
+        var self = this;
+        if(!this.get('colorSchemes')[schemeName]) {
+            return;
+        }
+        self.set('activeColorScheme',schemeName);
+        var world = this.get('world');
+        world.getBodies().forEach(function(body){
+            body.styles.fillStyle = self._sampleColor();
+            body.view = undefined;
+        });
+    },
+
+    _sampleColor: function () {
+        var colorSet = this.get('colorSchemes')[this.get('activeColorScheme')];
         return colorSet[Math.floor(Math.random() * colorSet.length)];
     },
 
@@ -170,8 +210,10 @@ export default Ember.Component.extend({
             var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
             bodies.forEach(function(body,index){
-                var x = body.state.vel.x,
-                    y = body.state.vel.y;
+                var oldX = body.state.vel.x,
+                    oldY = body.state.vel.y,
+                    x = oldX,
+                    y = oldY;
                 if(x < 0) {
                     x -= INC;
                 }
@@ -184,10 +226,15 @@ export default Ember.Component.extend({
                 else {
                     y += INC;
                 }
+
                 body.state.vel.set(x,y);
             })
         },
         slowBodiesDown: function(){
+            var numSign = function(num) {
+                return num?num<0?-1:1:0;
+            }
+
             var world = this.get('world');
             var INC = this.get('VELOCITY_INCREMENT');
             var bodies = world.getBodies();
@@ -209,6 +256,13 @@ export default Ember.Component.extend({
                 }
                 else {
                     y -= INC;
+                }
+
+                if(
+                    numSign(x) !== numSign(body.state.vel.x)
+                    || numSign(y) !== numSign(body.state.vel.y)
+                ) {
+                    return;
                 }
                 body.state.vel.set(x,y);
             })
@@ -254,6 +308,13 @@ export default Ember.Component.extend({
                 screenfull.toggle();
                 this.set('fullscreen',!this.get('fullscreen'));
             }
+        },
+        setColorScheme: function(schemeName) {
+            this.activateColorScheme(schemeName);
+        },
+        toggleControls: function() {
+            this.$('#controls').toggle();
+            this.set('controlsHidden',!this.get('controlsHidden'));
         }
     }
 
