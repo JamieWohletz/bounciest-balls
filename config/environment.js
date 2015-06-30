@@ -5,7 +5,7 @@ module.exports = function(environment) {
     modulePrefix: 'bounciest-balls',
     environment: environment,
     podModulePrefix: 'bounciest-balls/pods',
-    baseURL: '/',
+    baseURL: '/bounciest-balls',
     locationType: 'auto',
     EmberENV: {
       FEATURES: {
@@ -41,7 +41,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-
+      ENV.baseURL = '/bounciest-balls';
   }
 
   return ENV;
