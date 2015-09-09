@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import COLOR_SCHEMES from './color-schemes';
 /* global Physics */
 /* global screenfull */
 
@@ -9,12 +10,6 @@ export default Ember.Component.extend({
     SIZE_INCREMENT: 3,
 
     tagName: 'section',
-    width: function(){
-        return this.$(window).width();
-    }.property(),
-    height: function(){
-        return this.$(window).height();
-    }.property(),
 
     paused: false,
     fullscreen: false,
@@ -32,47 +27,18 @@ export default Ember.Component.extend({
 
     elasticityOn: true,
 
-    activeColorScheme: 'sunset',
-    colorSchemes: {
-        'sunset': [
-            '#FFE029',
-            '#E87115',
-            '#FF1614',
-            '#86A4E8',
-            '#1A28FF'
-        ],
-        'rainbow': [
-            '#FF0000',
-            '#FF7F00',
-            '#FFFF00',
-            '#00FF00',
-            '#0000FF',
-            '#4b0082',
-            '#8B00FF'
-        ],
-        'icy': [
-            '#022957',
-            '#042E5A',
-            '#4684C0',
-            '#C0DAF2',
-            '#7FC1F1'
-        ],
-        'magenta': [
-            '#FF170C',
-            '#DE0A53',
-            '#B60ADE',
-            '#8C0CF9',
-            '#F501CF'
-        ],
-        'america': [
-            '#D5D6DB',
-            '#3E0311',
-            '#C1233E',
-            '#202E5B',
-            '#5F85C0'
-        ],
-        'random': []
-    },
+    activeColorScheme: COLOR_SCHEMES[0],
+    colorSchemes: COLOR_SCHEMES,
+    colorSchemeNames: function(){
+      return Ember.keys(this.get('colorSchemes'));
+    }.property('colorSchemes'),
+
+    backgroundColor: 'black',
+    backgroundColors: [
+      'black',
+      'white',
+      'gray'
+    ],
 
     _generateBall: function() {
         return Physics.body('circle', {
@@ -89,11 +55,10 @@ export default Ember.Component.extend({
         });
     },
     _init: function(){
-        var renderer, world, viewWidth, viewHeight, element, self;
+        var renderer, world, edgeCollisionBehavior, element, self;
         self = this;
 
         Physics.body.mixin('collide', function(){
-            //wall
             if(this.radius) {
                 this.styles.fillStyle = self._sampleColor();
                 this.view = undefined;
@@ -103,9 +68,6 @@ export default Ember.Component.extend({
         });
         element = 'physics-canvas';
 
-        viewWidth = this.get('width');
-        viewHeight = this.get('height');
-
         world = new Physics({
             integrator: 'verlet',
             sleepDisabled: true
@@ -113,9 +75,8 @@ export default Ember.Component.extend({
 
         renderer = new Physics.renderer('canvas', {
             el: element,
-            width: viewWidth,
-            height: viewHeight,
             meta: false,
+            autoResize: true,
             styles: {
                 'circle': {
                     lineWidth: 1,
@@ -131,13 +92,8 @@ export default Ember.Component.extend({
             world.render();
         });
 
-        var viewportBounds = Physics.aabb(0, 0, viewWidth, viewHeight);
-
-        // constrain objects to these bounds
-        world.add(Physics.behavior('edge-collision-detection', {
-            aabb: viewportBounds,
-            restitution: 1
-        }));
+        edgeCollisionBehavior = this._generateEdgeCollisionBehavior();
+        world.addBehavior(edgeCollisionBehavior);
 
         //make balls bounce off the walls
         world.add(Physics.behavior('body-impulse-response'));
@@ -152,11 +108,11 @@ export default Ember.Component.extend({
 
         Physics.util.ticker.start();
 
-        this._setupListeners(world);
+        this._setupListeners(world, edgeCollisionBehavior);
         this.set('world',world);
     }.on('didInsertElement'),
 
-    _setupListeners: function(world){
+    _setupListeners: function(world, edgeCollisionBehavior){
         var self = this;
 
         world.on('collisions:detected', function(data) {
@@ -174,7 +130,29 @@ export default Ember.Component.extend({
                 }
             }
         });
+
+        $(window).resize(function(){
+          var world = self.get('world');
+          world.removeBehavior(edgeCollisionBehavior);
+          edgeCollisionBehavior = self._generateEdgeCollisionBehavior();
+          world.addBehavior(edgeCollisionBehavior);
+        });
     },
+
+    _generateEdgeCollisionBehavior: function(){
+      var viewportBounds, viewWidth, viewHeight;
+      viewWidth = this.$().width();
+      viewHeight = this.$().height();
+      viewportBounds = Physics.aabb(0, 0, viewWidth, viewHeight);
+      return Physics.behavior('edge-collision-detection', {
+          aabb: viewportBounds,
+          restitution: 1
+      });
+    },
+
+    _autoChooseColorScheme: function() {
+      this.activateColorScheme(this.get('activeColorScheme'));
+    }.observes('activeColorScheme'),
 
     activateColorScheme: function(schemeName){
         var self = this;
@@ -206,6 +184,14 @@ export default Ember.Component.extend({
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
+    },
+
+    _autoChooseBackgroundColor: function(){
+      this.setBackgroundColor(this.get('backgroundColor'));
+    }.observes('backgroundColor'),
+
+    setBackgroundColor: function(color){
+      this.$().css('background',color);
     },
 
     toggleBallCollisions: function(world){
@@ -251,10 +237,8 @@ export default Ember.Component.extend({
         var INC = this.get('VELOCITY_INCREMENT');
         var bodies = world.getBodies();
         bodies.forEach(function(body){
-            var oldX = body.state.vel.x,
-                oldY = body.state.vel.y,
-                x = oldX,
-                y = oldY;
+            var x = body.state.vel.x,
+                y = body.state.vel.y;
             if(x < 0) {
                 x -= INC;
             }
@@ -324,7 +308,7 @@ export default Ember.Component.extend({
             this.changeSizeOfBodies(this.get('world'), false);
         },
         addOneBody: function(){
-            this.get('world').add(this._generateBall());
+            this.get('world').addBody(this._generateBall());
         },
         removeOneBody: function() {
             var world = this.get('world');
@@ -335,6 +319,10 @@ export default Ember.Component.extend({
         },
         toggleCollisionDetection: function() {
             this.toggleBallCollisions(this.get('world'));
+        },
+        clear: function() {
+          var w = this.get('world');
+          w.remove(w.getBodies());
         },
         pause: function() {
             var world = this.get('world');
@@ -361,9 +349,6 @@ export default Ember.Component.extend({
         },
         toggleChangeColors: function() {
             this.set('changeColors',!this.get('changeColors'));
-        },
-        setColorScheme: function(schemeName) {
-            this.activateColorScheme(schemeName);
         },
         toggleControls: function() {
             this.$('#controls').toggle();

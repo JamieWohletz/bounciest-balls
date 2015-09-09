@@ -1,4 +1,4 @@
-<button id="show-hide-controls" {{action "toggleControls"}}>
+<button id="show-hide-controls" {{action "toggleControls"}} title="Show/hide controls">
     {{#if controlsHidden}}
         {{fa-icon "eye"}}
     {{else}}
@@ -8,7 +8,7 @@
 <canvas id="physics-canvas"></canvas>
 <div id="controls">
 
-    <div class="icons">
+    <div class="control-row">
         {{fa-icon "sliders"}}
         <span class="quantity">
             {{#mousedown-button action="addOneBody"}}
@@ -44,8 +44,13 @@
             {{/mousedown-button}}
         </span>
 
+        <span class="clear">
+          <button {{action "clear"}}>
+            {{fa-icon "eraser"}} clear
+          </button>
+        </span>
     </div>
-    <div>
+    <div class="control-row">
         {{fa-icon "gear"}}
         <span class="collisions">
             <button {{action "toggleCollisionDetection"}}>
@@ -80,6 +85,15 @@
             </button>
         </span>
 
+        <button {{action "toggleChangeColors"}}>
+            {{#if changeColors}}
+                {{fa-icon "check"}}
+            {{else}}
+                {{fa-icon "close"}}
+            {{/if}}
+            change colors
+        </button>
+
         <span class="fullscreen">
             <button {{action "toggleFullscreen"}}>
                 {{#if fullscreen}}
@@ -89,38 +103,10 @@
                 {{/if}}
             </button>
         </span>
-
-        <button {{action "toggleChangeColors"}}>
-            {{#if changeColors}}
-                {{fa-icon "check"}}
-            {{else}}
-                {{fa-icon "close"}}
-            {{/if}}
-            change colors
-        </button>
     </div>
-    <div>
-        {{fa-icon "tint"}}
-        <!-- This is ugly -- hoping to do this a better way soon -->
-        <span class="colors">
-            <button {{action "setColorScheme" "sunset"}}>
-                sunset
-            </button>
-            <button {{action "setColorScheme" "rainbow"}}>
-                rainbow
-            </button>
-            <button {{action "setColorScheme" "icy"}}>
-                icy
-            </button>
-            <button {{action "setColorScheme" "magenta"}}>
-                magenta
-            </button>
-            <button {{action "setColorScheme" "america"}}>
-                america
-            </button>
-            <button {{action "setColorScheme" "random"}}>
-                random
-            </button>
-        </span>
+    <div class="control-row">
+        {{fa-icon "tint"}}&nbsp;
+        color scheme: {{view "select" content=colorSchemeNames value=activeColorScheme}}
+        background: {{view "select" content=backgroundColors value=backgroundColor}}
     </div>
 </div>
