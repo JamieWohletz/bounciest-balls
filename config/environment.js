@@ -39,6 +39,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
+    ENV.baseURL = '/bounciest-balls';
   }
 
   return ENV;
